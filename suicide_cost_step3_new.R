@@ -19,7 +19,7 @@ for(fyear in 2015:2013){
                            "fy", fyear, "all_ages.csv"),
                     colClasses = "character")
   pt <- elig_pt[FiscalYR == fyear][!mcpt, on = "INTERNAL_MEMBER_ID"]
-  scpt <- fread(paste0("output/sc_", fyear, ".csv"), select = "INTERNAL_MEMBER_ID",
+  scpt <- fread(paste0("output_new/sc_step1_", fyear, "_new.csv"), select = "INTERNAL_MEMBER_ID",
                     colClasses = "character") %>% unique()
   scpt <- scpt[pt, on = "INTERNAL_MEMBER_ID",
                        nomatch = 0]
@@ -50,7 +50,7 @@ for(fyear in 2017:2013){
 scmccost <- pt[scmccost[, -"birth_dt"], on = "INTERNAL_MEMBER_ID"]
 names(scmccost)[3:7] <- paste0(2013:2017, "_total_medical_cost")
 fwrite(scmccost,
-       file = paste0("output/total_medical_cost.csv"))
+       file = paste0("output_new/total_medical_cost.csv"))
 
 
 ## total pharmacy cost
@@ -75,7 +75,7 @@ scphcost <- pt[scphcost, on = "INTERNAL_MEMBER_ID"]
 names(scphcost)[3:7] <- paste0(2013:2017, "_total_pharmacy_cost")
 
 fwrite(scphcost,
-       file = paste0("output/total_pharmacy_cost.csv"))
+       file = paste0("output_new/total_pharmacy_cost.csv"))
 
 ## ip cost
 scipcost <- pt[, -"birth_dt"]
@@ -99,7 +99,7 @@ for(fyear in 2017:2013){
 scipcost <- pt[scipcost, on = "INTERNAL_MEMBER_ID"]
 names(scipcost)[3:7] <- paste0(2013:2017, "_ip_cost")
 fwrite(scipcost,
-       file = paste0("output/ip_cost.csv"))
+       file = paste0("output_new/ip_cost.csv"))
 
 ## op cost
 scopcost <- pt[, -"birth_dt"]
@@ -124,7 +124,7 @@ scopcost <- pt[scopcost, on = "INTERNAL_MEMBER_ID"]
 names(scopcost)[3:7] <- paste0(2013:2017, "_op_cost")
 
 fwrite(scopcost,
-       file = paste0("output/op_cost.csv"))
+       file = paste0("output_new/op_cost.csv"))
 
 
 ## pc cost
@@ -149,14 +149,14 @@ for(fyear in 2017:2013){
 scpccost <- pt[scpccost, on = "INTERNAL_MEMBER_ID"]
 names(scpccost)[3:7] <- paste0(2013:2017, "_pc_cost")
 fwrite(scpccost,
-       file = paste0("output/pc_cost.csv"))
+       file = paste0("output_new/pc_cost.csv"))
 
 ## combine them
 rt <- pt
 for(rtname in c("total_medical", "total_pharmacy", "ip", "op", "pc")){
-  rt_tmp <- fread(paste0("output/", rtname, "_cost.csv"), colClasses = "character")
+  rt_tmp <- fread(paste0("output_new/", rtname, "_cost.csv"), colClasses = "character")
   rt <- rt[rt_tmp[, -"birth_dt"], on = "INTERNAL_MEMBER_ID"]
 }
 
 fwrite(rt,
-       file = paste0("output/all_cost.csv"))
+       file = paste0("output_new/all_cost.csv"))

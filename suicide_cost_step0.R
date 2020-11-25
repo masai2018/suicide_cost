@@ -17,7 +17,7 @@ elig_pt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/",
                  select = c("INTERNAL_MEMBER_ID",
                             "birth_dt",
                             "FiscalYR")) %>% unique(use.key = FALSE)
-for(yr in 2013:2015){
+for(yr in 2016:2017){
   cat(paste0("begin ", yr, " at ", Sys.time(), "\n"))
   mcpt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/", 
                        "APCD_modified/medicare_medicare_ad_patients/", 
@@ -43,17 +43,18 @@ for(yr in 2013:2015){
       rm(dgx)
       gc()
       dgx2[ICD_VERSION_IND == 0, 
-           DIAGNOSIS_CODE := icd_map(DIAGNOSIS_CODE, 10, 9, 
-                                     method = "both")]
+           `:=`(DIAGNOSIS_CODE = icd_map(DIAGNOSIS_CODE, 10, 9, 
+                                     method = "both"),
+                ICD_VERSION_IND = 9)]
       fwrite(dgx2, 
-             file = paste0("output_new/dgx_", yr, "_.csv"), append = TRUE)
+             file = paste0("output/dgx_", yr, ".csv"), append = TRUE)
       rm(dgx2)
       gc()
     }
     cat(paste0(yr, " ", i,  " done at ", Sys.time(), "\n"))
   }
-  fwrite(mc, 
-         file = paste0("output_new/mc_", yr, "_.csv"))
+  # fwrite(mc, 
+  #        file = paste0("output/mc_", yr, "_.csv"))
   rm(mcpt, elig_pt1, mc)
   cat(paste0(yr, " done at ", Sys.time(), "\n"))
 }

@@ -13,20 +13,20 @@ elig_pt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/",
                  select = c("INTERNAL_MEMBER_ID",
                             "birth_dt",
                             "FiscalYR")) %>% unique(use.key = FALSE)
-for(fyear in 2015:2013){
+for(yr in 2015:2013){
   mcpt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/", 
                            "APCD_modified/medicare_medicare_ad_patients/", 
-                           "fy", fyear, "all_ages.csv"),
+                           "fy", yr, "all_ages.csv"),
                     colClasses = "character")
-  pt <- elig_pt[FiscalYR == fyear][!mcpt, on = "INTERNAL_MEMBER_ID"]
-  scpt <- fread(paste0("output/sc_", fyear, ".csv"), select = "INTERNAL_MEMBER_ID",
+  tmp <- elig_pt[FiscalYR == yr][!mcpt, on = "INTERNAL_MEMBER_ID"]
+  scpt <- fread(paste0("output/sc_pt_com_", yr, ".csv"), select = "INTERNAL_MEMBER_ID",
                     colClasses = "character") %>% unique()
-  scpt <- scpt[pt, on = "INTERNAL_MEMBER_ID",
+  scpt <- scpt[tmp, on = "INTERNAL_MEMBER_ID",
                        nomatch = 0]
-  fname <- paste0("scpt", fyear)
+  fname <- paste0("scpt", yr)
   assign(fname, scpt)
 }
-pt <- scpt2015[!INTERNAL_MEMBER_ID %in% scpt2013$INTERNAL_MEMBER_ID |
+pt <- scpt2015[!INTERNAL_MEMBER_ID %in% scpt2013$INTERNAL_MEMBER_ID &
                  !INTERNAL_MEMBER_ID %in% scpt2014$INTERNAL_MEMBER_ID
                ][, -"FiscalYR"]
 ## total medical claim

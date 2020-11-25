@@ -17,7 +17,7 @@ elig_pt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/",
                  select = c("INTERNAL_MEMBER_ID",
                             "birth_dt",
                             "FiscalYR")) %>% unique(use.key = FALSE)
-for(yr in 2016:2017){
+for(yr in 2013:2017){
   cat(paste0("begin ", yr, " at ", Sys.time(), "\n"))
   mcpt <- fread(paste0("E:/CT_APCD/shared/intermediate_data/", 
                        "APCD_modified/medicare_medicare_ad_patients/", 

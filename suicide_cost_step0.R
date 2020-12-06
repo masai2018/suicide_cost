@@ -1,3 +1,9 @@
+if(Sys.info()[4] %in% c("LAZ-ID1",
+                        "LAZ-ID2",
+                        "LAZ-DEID1",
+                        "LAZ-DEID2")){
+  setwd("E:/CT_APCD/Sai/suicide_cost")
+}
 library(methods)
 source("utils.R")
 need_pkgs <- c("data.table", "bit64", "tools", "touch", "knitr",

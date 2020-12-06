@@ -1,3 +1,9 @@
+if(Sys.info()[4] %in% c("LAZ-ID1",
+                        "LAZ-ID2",
+                        "LAZ-DEID1",
+                        "LAZ-DEID2")){
+  setwd("E:/CT_APCD/Sai/suicide_cost")
+}
 library(methods)
 source("utils.R")
 need_pkgs <- c("data.table", "bit64", "tools", "touch", 
@@ -86,29 +92,51 @@ uniqueN(pt2$INTERNAL_MEMBER_ID)   # 702
 # Also, note that it’s “medical” claim and not “medicare” claim.
 # Also note that this is just one number for 2013-2017.
 
-for(yr in 2015:2017){
+for(yr in 2015:2013){
   scpt <- fread(paste0("output/sc_pt_com_", yr, ".csv"), select = "INTERNAL_MEMBER_ID",
                 colClasses = "character") %>% unique()
   fname <- paste0("scpt", yr)
   assign(fname, scpt)
 }
 pt3 <- mc_ce[!mc_ce %in% unique(rbind(scpt2015,
-                                      scpt2016,
-                                      scpt2017)$INTERNAL_MEMBER_ID)]
-uniqueN(pt3)       # 429844
+                                      scpt2014,
+                                      scpt2013)$INTERNAL_MEMBER_ID)]
+uniqueN(pt3)       # 437508
 
 # 4) Persons with medical data who have continuous eligibility for medical 
 # benefits from 2013 to 2017 and have no suicide attempts in 2015, 2016 or 
 # 2017. Also, note that it’s “medical” claim and not “medicare” claim. 
 # Also note that this is just one number for 2013-2017.
 
-for(yr in 2015:2017){
+for(yr in 2015:2013){
   scpt <- fread(paste0("output/sc_pt_com_", yr, ".csv"), select = "INTERNAL_MEMBER_ID",
                 colClasses = "character") %>% unique()
   fname <- paste0("scpt", yr)
   assign(fname, scpt)
 }
 pt4 <- elig_ce[!elig_ce %in% unique(rbind(scpt2015,
-                                      scpt2016,
-                                      scpt2017)$INTERNAL_MEMBER_ID)]
-uniqueN(pt4)       # 421953
+                                      scpt2014,
+                                      scpt2013)$INTERNAL_MEMBER_ID)]
+uniqueN(pt4)       # 428275
+
+## intermidiate file
+mc_pt <- data.table(internal_member_id = unique(c(mc_ce, elig_ce)),
+                    at_least_one_medical_claim = 0,
+                    continuous_elig = 0,
+                    suicide_1 = 0,
+                    suicide_2 = 0,
+                    no_suicide_1 = 0,
+                    no_suicide_2 = 0)
+mc_pt[internal_member_id %in% mc_ce, at_least_one_medical_claim := 1]
+mc_pt[internal_member_id %in% elig_ce, continuous_elig := 1]
+mc_pt[internal_member_id %in% pt1$INTERNAL_MEMBER_ID, suicide_1 := 1]
+mc_pt[internal_member_id %in% pt2$INTERNAL_MEMBER_ID, suicide_2 := 1]
+mc_pt[internal_member_id %in% pt3, no_suicide_1 := 1]
+mc_pt[internal_member_id %in% pt4, no_suicide_2 := 1]
+table(mc_pt$at_least_one_medical_claim)
+table(mc_pt$continuous_elig)
+table(mc_pt$suicide_1)
+table(mc_pt$suicide_2)
+table(mc_pt$no_suicide_1)
+table(mc_pt$no_suicide_2)
+fwrite(mc_pt, file = "output/no_of_pt.csv")

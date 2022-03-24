@@ -73,18 +73,12 @@ for(yr in 2013:2017){
   gc()
   cat(paste0(yr, " done at ", Sys.time(), "\n"))
 }
-elig_ce <- Reduce(base::intersect, list(elig2013, elig2014, elig2015,
-                                  elig2016, elig2017))
-mc_ce <- Reduce(base::intersect, list(mc2013, mc2014, mc2015,
-                                mc2016, mc2017))
-pt <- Reduce(base::intersect, list(elig_ce, mc_ce)) %>% unique()
-pt <- data.table(INTERNAL_MEMBER_ID = pt)
+
+
+pt <- data.table(INTERNAL_MEMBER_ID = elig2013)
 elig_pt4 <- unique(elig_pt3[, .(INTERNAL_MEMBER_ID, GENDER_CODE, birth_dt)])
 pt2 <- elig_pt4[pt, on = "INTERNAL_MEMBER_ID"]
-pt2[, age := 2015 - as.integer(birth_dt)]
-pt3 <- pt2[age < 65]
-uniqueN(pt3)
-fwrite(pt3, file = paste0("output/pt_all.csv"))
+# fwrite(pt2, file = paste0("output/pt_all.csv"))
 
 for(yr in 2015:2013){
   scpt9 <- fread(paste0("output/dgx_mc_", yr, "_sc_icd9.csv"),
@@ -101,11 +95,7 @@ for(yr in 2015:2013){
 }
 scpt13_15 <- rbind(scpt2013, scpt2014, scpt2015) %>% unique()
 noscpt <- pt[!INTERNAL_MEMBER_ID %in% scpt13_15$INTERNAL_MEMBER_ID]
-noscpt2 <- unique(elig_pt3[, .(INTERNAL_MEMBER_ID,
-                              birth_dt,
-                              GENDER_CODE)])[noscpt,
-                                             on = "INTERNAL_MEMBER_ID"] %>% unique()
-fwrite(noscpt2,
+fwrite(noscpt,
        file = paste0("output/no_sc_2013_2015_pt.csv"))
 
 for(yr in 2015:2013){
@@ -132,8 +122,6 @@ sc_15_no_sc_13_14 <- unique(elig_pt3[, .(INTERNAL_MEMBER_ID,
                                                         on = "INTERNAL_MEMBER_ID"]
 fwrite(sc_15_no_sc_13_14,
        file = paste0("output/sc_15_no_sc_13_14.csv"))
-fwrite(unique(sc_15_no_sc_13_14[, .(INTERNAL_MEMBER_ID)]),
-       file = paste0("output/sc_15_no_sc_13_14_pt.csv"))
 scpt2015 <- scpt2015[INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID
                      ][, .(INTERNAL_MEMBER_ID)] %>% unique()
 fwrite(scpt2015,

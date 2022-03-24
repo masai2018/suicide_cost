@@ -5,4 +5,9 @@
 .csv
 output/
 .Rproj
-suicide_cost.Rproj
+.Rproj
+.csv
+.xlsx
+.idea/
+.pdf
+comorbidities/

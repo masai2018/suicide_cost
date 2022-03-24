@@ -46,8 +46,10 @@ isSuicideAttempt_icd9 <- function(dx_codes,
         ## 309.0-309.1, 311, 296.00-296.06, 296.1-296.14, 296.40-296.89,
         ## 296.99, 301.13, 301, 290.8-290.9, 295, 297, 298.1-298.9, 299,
         ## 301.20-301.22, 780.1, 309.2-309.9 )
-        idx3_1 <- (any(x == 88100) || anyInside(x, 96000, 98999) ||
-                   any(x == 99470))
+        # idx3_1 <- (any(x == 88100) || anyInside(x, 96000, 98999) ||
+        #            any(x == 99470))
+        idx3_1 <- (anyInside(x, 88100, 88199) || anyInside(x, 96000, 98999) ||
+                       any(x == 99470))
         idx3_2 <- any(x %in% c(29383, 29682, 29800, 30040, 31100, 29699,
                                30113, 30100, 29500, 29700, 29900, 78010)) ||
             anyInside(x, 29620, 29636) || anyInside(x, 30900, 30910) ||
@@ -62,19 +64,25 @@ isSuicideAttempt_icd9 <- function(dx_codes,
 
         ## rule 5: Barak-Corren et al
         ## rule 6: Walsh et al
-        idx6 <- anyInside(x, 119500, 119599)
-        idx5 <- idx6 ||
-            anyInside(x, 96500, 96599) || anyInside(x, 96700, 96799) ||
-            anyInside(x, 96900, 96999) || anyInside(x, 88100, 88199)
+        # idx6 <- anyInside(x, 119500, 119599)
+        # idx5 <- idx6 ||
+        #     anyInside(x, 96500, 96599) || anyInside(x, 96700, 96799) ||
+        #     anyInside(x, 96900, 96999) || anyInside(x, 88100, 88199)
 
         ## return
         if (return_raw) {
-            setNames(c(idx1, idx2_1, idx2_2, idx3_1, idx3_2, idx4, idx5, idx6),
+            setNames(c(idx1, idx2_1, idx2_2, idx3_1, idx3_2, idx4, 
+                       # idx5, idx6,
+                       NULL),
                      c("idx1", "idx2_1", "idx2_2", "idx3_1",
-                       "idx3_2", "idx4", "idx5", "idx6"))
+                       "idx3_2", "idx4", 
+                       # "idx5", "idx6",
+                       NULL))
         } else {
-            setNames(c(idx1, idx2, idx3, idx4, idx5, idx6),
-                     paste0("idx", seq_len(6)))
+            setNames(c(idx1, idx2, idx3, idx4, 
+                       # idx5, idx6,
+                       NULL),
+                     paste0("idx", seq_len(4)))
         }
     }
     dx_codes_list <- if (need_split) {
@@ -83,7 +91,7 @@ isSuicideAttempt_icd9 <- function(dx_codes,
                          dx_codes
                      }
     ## return
-    lapply(dx_codes_list, is_sa)
+    sapply(dx_codes_list, is_sa)
 }
 
 
@@ -96,14 +104,14 @@ isSuicideAttempt_icd9 <- function(dx_codes,
 ##'     sub-conditions. The default is \code{FALSE}.
 ##'
 ##' @return a list of different suicide attempt indicators
-isSuicideAttempt_icd10 <- function(dx_codes,
-                                   need_split = TRUE,
-                                   return_raw = FALSE)
-{
-    ## convert icd-10 codes back to icd-9 codes by forward and backward GEM
-    dx_codes_icd9 <- touch::icd_map(dx_codes, from = 10, to = 9,
-                                    method = "both")
-    isSuicideAttempt_icd9(dx_codes_icd9,
-                          need_split = need_split,
-                          return_raw = return_raw)
-}
+# isSuicideAttempt_icd10 <- function(dx_codes,
+#                                    need_split = TRUE,
+#                                    return_raw = FALSE)
+# {
+#     ## convert icd-10 codes back to icd-9 codes by forward and backward GEM
+#     dx_codes_icd9 <- touch::icd_map(dx_codes, from = 10, to = 9,
+#                                     method = "both")
+#     isSuicideAttempt_icd9(dx_codes_icd9,
+#                           need_split = need_split,
+#                           return_raw = return_raw)
+# }

@@ -77,13 +77,19 @@ mccost <- mccost[, .(INTERNAL_MEMBER_ID,
                       MEDICAL_CLAIM_HEADER_ID,
                       ALLOWED_AMT,
                       GENDER_CODE,
-                      age, sc_code, header_type)]
+                      age, sc_code, header_type, first_service_dt)]
 mccost <- unique(mccost, use.key = FALSE)
-mccost1 <- mccost[sc_code == TRUE & header_type %in% c("0", "3", "4")] %>% unique(use.key = FALSE)
-mccost2 <- mccost[header_type %in% c("0", "3", "4")] %>% unique(use.key = FALSE)
-mccost3 <- mccost[sc_code == TRUE] %>% unique(use.key = FALSE)
+mccost_tmp1 <- mccost[sc_code == TRUE, lapply(.SD, min),
+                 .SDcols = "first_service_dt", by = "INTERNAL_MEMBER_ID"]
+mccost_tmp2 <- mccost[sc_code == FALSE]
+mccost_tmp3 <- mccost[sc_code == TRUE][mccost_tmp1,
+                                       on = c("first_service_dt","INTERNAL_MEMBER_ID")]
+mccost_tmp <- rbind(mccost_tmp2, mccost_tmp3)
+mccost1 <- mccost_tmp[sc_code == TRUE & header_type %in% c("0", "3", "4")] %>% unique(use.key = FALSE)
+mccost2 <- mccost_tmp[header_type %in% c("0", "3", "4")] %>% unique(use.key = FALSE)
+mccost3 <- mccost_tmp[sc_code == TRUE] %>% unique(use.key = FALSE)
 
-
+smy0 <- mccost_tmp[, lapply(.SD, sum), .SDcol = "ALLOWED_AMT", by = "INTERNAL_MEMBER_ID"]
 smy1 <- mccost1[, lapply(.SD, sum), .SDcol = "ALLOWED_AMT", by = "INTERNAL_MEMBER_ID"]
 smy2 <- mccost2[, lapply(.SD, sum), .SDcol = "ALLOWED_AMT", by = "INTERNAL_MEMBER_ID"]
 smy3 <- mccost3[, lapply(.SD, sum), .SDcol = "ALLOWED_AMT", by = "INTERNAL_MEMBER_ID"]

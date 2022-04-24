@@ -209,6 +209,9 @@ for(i in c("ed_only","ip_only", "op_only", "ed_ip_overlap","ip_op_overlap", "op_
     mccost3 <- op3[medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
     mccost3 <- mccost3[medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
   } else if (i == "all_minus_ip_op_ed") {
+    names(all1) <- tolower(names(all1))
+    names(all2) <- tolower(names(all2))
+    names(all3) <- tolower(names(all3))
     mccost1 <- all1[!medical_claim_header_id %in% unique(op1$medical_claim_header_id)]
     mccost1 <- mccost1[!medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
     mccost1 <- mccost1[!medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]

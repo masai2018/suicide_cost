@@ -83,145 +83,30 @@ dem_smy_no_sc <- insertRows(dem_smy_no_sc, c(2, 6, 9, 13), NA)
 dem_smy <- cbind(dem_smy_sc, dem_smy_no_sc)
 
 
-indir_all <- paste0("E:/CT_APCD/Sai/intermediate_data/",
-                    "cost_measure_intermediate_data/", 
-                    "cost_files_by_year/")
-indir <- paste0("E:/CT_APCD/Sai/intermediate_data/",
-                "cost_measure_intermediate_data/", 
-                "value_sets_fyear/")
-all1 <- rbind(fread(paste0(indir_all, 
-                           "total_", 2013, "_all_ages.csv"),
+fl1 <-  rbind(fread(paste0("output/all_ed_ip_op_cost_", 2013, ".csv"),
                     colClasses = "character"),
-              fread(paste0(indir_all, 
-                           "total_", 2014, "_all_ages.csv"),
+              fread(paste0("output/all_ed_ip_op_cost_", 2014, ".csv"),
                     colClasses = "character"))
-all2 <- rbind(fread(paste0(indir_all, 
-                           "total_", 2016, "_all_ages.csv"),
-                    colClasses = "character"),
-              fread(paste0(indir_all,
-                           "total_", 2017, "_all_ages.csv"),
-                    colClasses = "character"))
-all3 <- fread(paste0(indir_all,
-                     "total_", 2015, "_all_ages.csv"),
+fl3 <-  fread(paste0("output/all_ed_ip_op_cost_", 2015, ".csv"),
               colClasses = "character")
-
-
-ip1 <- rbind(fread(paste0(indir, 
-                          "ip_raw_", 2013, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir, 
-                          "ip_raw_", 2014, "_all_ages.csv"),
-                   colClasses = "character"))
-ip2 <- rbind(fread(paste0(indir, 
-                          "ip_raw_", 2016, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir,
-                          "ip_raw_", 2017, "_all_ages.csv"),
-                   colClasses = "character"))
-ip3 <- fread(paste0(indir,
-                    "ip_raw_", 2015, "_all_ages.csv"),
-             colClasses = "character")
-
-op1 <- rbind(fread(paste0(indir, 
-                          "op_raw_", 2013, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir, 
-                          "op_raw_", 2014, "_all_ages.csv"),
-                   colClasses = "character"))
-op2 <- rbind(fread(paste0(indir, 
-                          "op_raw_", 2016, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir,
-                          "op_raw_", 2017, "_all_ages.csv"),
-                   colClasses = "character"))
-op3 <- fread(paste0(indir,
-                    "op_raw_", 2015, "_all_ages.csv"),
-             colClasses = "character")
-
-ed1 <- rbind(fread(paste0(indir, 
-                          "ed_raw_", 2013, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir, 
-                          "ed_raw_", 2014, "_all_ages.csv"),
-                   colClasses = "character"))
-ed2 <- rbind(fread(paste0(indir, 
-                          "ed_raw_", 2016, "_all_ages.csv"),
-                   colClasses = "character"),
-             fread(paste0(indir,
-                          "ed_raw_", 2017, "_all_ages.csv"),
-                   colClasses = "character"))
-ed3 <- fread(paste0(indir,
-                    "ed_raw_", 2015, "_all_ages.csv"),
-             colClasses = "character")
+fl2 <-  rbind(fread(paste0("output/all_ed_ip_op_cost_", 2016, ".csv"),
+                    colClasses = "character"),
+              fread(paste0("output/all_ed_ip_op_cost_", 2017, ".csv"),
+                    colClasses = "character"))
 
 
 
-
-for(i in c("ed_only","ip_only", "op_only", "ed_ip_overlap","ip_op_overlap", "op_ed_overlap",
-           "ip_op_ed", "all_minus_ip_op_ed")){
-  if (i == "ed_only"){
-    mccost1 <- ed1[!medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(op1$medical_claim_header_id)]
-    mccost2 <- ed2[!medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(op2$medical_claim_header_id)]
-    mccost3 <- ed3[!medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(op3$medical_claim_header_id)]
-  } else if (i == "ip_only") {
-    mccost1 <- ip1[!medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(op1$medical_claim_header_id)]
-    mccost2 <- ip2[!medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(op2$medical_claim_header_id)]
-    mccost3 <- ip3[!medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(op3$medical_claim_header_id)]
-  } else if (i == "op_only") {
-    mccost1 <- op1[!medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost2 <- op2[!medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost3 <- op3[!medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-  } else if (i == "ip_op_overlap") {
-    mccost1 <- op1[!medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost2 <- op2[!medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost3 <- op3[!medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-  } else if (i == "ed_ip_overlap") {
-    mccost1 <- ip1[medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(op1$medical_claim_header_id)]
-    mccost2 <- ip2[medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(op2$medical_claim_header_id)]
-    mccost3 <- ip3[medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(op3$medical_claim_header_id)]
-  } else if (i == "op_ed_overlap") {
-    mccost1 <- op1[medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost2 <- op2[medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost3 <- op3[medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-  } else if (i == "ip_op_ed") {
-    mccost1 <- op1[medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost2 <- op2[medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost3 <- op3[medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-  } else if (i == "all_minus_ip_op_ed") {
-    names(all1) <- tolower(names(all1))
-    names(all2) <- tolower(names(all2))
-    names(all3) <- tolower(names(all3))
-    mccost1 <- all1[!medical_claim_header_id %in% unique(op1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(ed1$medical_claim_header_id)]
-    mccost1 <- mccost1[!medical_claim_header_id %in% unique(ip1$medical_claim_header_id)]
-    mccost2 <- all2[!medical_claim_header_id %in% unique(op2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(ed2$medical_claim_header_id)]
-    mccost2 <- mccost2[!medical_claim_header_id %in% unique(ip2$medical_claim_header_id)]
-    mccost3 <- all3[!medical_claim_header_id %in% unique(op3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(ed3$medical_claim_header_id)]
-    mccost3 <- mccost3[!medical_claim_header_id %in% unique(ip3$medical_claim_header_id)]
-  } 
+for(i in c("ed_only","ip_only", "op_only", "ed_ip_only","ip_op_only", "ed_op_only",
+           "ed_ip_op", "not_ed_ip_op")){
+  mccost1 <- fl1[type_of_header_id == i, .(MEDICAL_CLAIM_HEADER_ID,
+                                           INTERNAL_MEMBER_ID,
+                                           ALLOWED_AMT)]
+  mccost2 <- fl2[type_of_header_id == i, .(MEDICAL_CLAIM_HEADER_ID,
+                                           INTERNAL_MEMBER_ID,
+                                           ALLOWED_AMT)]
+  mccost3 <- fl3[type_of_header_id == i, .(MEDICAL_CLAIM_HEADER_ID,
+                                           INTERNAL_MEMBER_ID,
+                                           ALLOWED_AMT)]
   names(mccost1) <- toupper(names(mccost1))
   names(mccost2) <- toupper(names(mccost2))
   names(mccost3) <- toupper(names(mccost3))
@@ -352,3 +237,224 @@ for(i in c("ed_only","ip_only", "op_only", "ed_ip_overlap","ip_op_overlap", "op_
   fwrite(total_cost, file = paste0(i, "_smy.csv"))
   
 }
+
+
+for(i in c("all","ip", "op", "ed", "pharmacy")){
+  if(i == "all"){
+    mccost1 <- fl1[, .(MEDICAL_CLAIM_HEADER_ID,
+                       INTERNAL_MEMBER_ID,
+                       ALLOWED_AMT)]
+    mccost2 <- fl2[, .(MEDICAL_CLAIM_HEADER_ID,
+                       INTERNAL_MEMBER_ID,
+                       ALLOWED_AMT)]
+    mccost3 <- fl3[, .(MEDICAL_CLAIM_HEADER_ID,
+                       INTERNAL_MEMBER_ID,
+                       ALLOWED_AMT)]
+  } else if( i == "ip"){
+    mccost1 <- fl1[type_of_header_id %in% c("ip_only",  "ed_ip_only","ip_op_only", 
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost2 <- fl2[type_of_header_id %in% c("ip_only",  "ed_ip_only","ip_op_only", 
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost3 <- fl3[type_of_header_id %in% c("ip_only",  "ed_ip_only","ip_op_only", 
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+  } else if (i == "op"){
+    mccost1 <- fl1[type_of_header_id %in% c("op_only","ip_op_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost2 <- fl2[type_of_header_id %in% c("op_only","ip_op_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost3 <- fl3[type_of_header_id %in% c("op_only","ip_op_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+  } else if (i == "ed"){
+    mccost1 <- fl1[type_of_header_id %in% c("ed_only","ed_ip_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost2 <- fl2[type_of_header_id %in% c("ed_only","ed_ip_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+    mccost3 <- fl3[type_of_header_id %in% c("ed_only","ed_ip_only", "ed_op_only",
+                                            "ed_ip_op"), .(MEDICAL_CLAIM_HEADER_ID,
+                                                           INTERNAL_MEMBER_ID,
+                                                           ALLOWED_AMT)]
+  } else if( i == 'pharmacy'){
+    mccost1 <- rbind(fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                                  "cost_measure_intermediate_data/", 
+                                  "cost_files_by_year/",
+                                  "total_pharmacy_", 2013, "_all_ages.csv"), colClasses = "character",
+                           select = c("INTERNAL_MEMBER_ID",
+                                      "total", "pharmacy_claim_service_line_id"))[
+                                        INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)],
+                     fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                                  "cost_measure_intermediate_data/", 
+                                  "cost_files_by_year/",
+                                  "total_pharmacy_", 2014, "_all_ages.csv"), colClasses = "character",
+                           select = c("INTERNAL_MEMBER_ID",
+                                      "total", "pharmacy_claim_service_line_id"))[INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)])
+    mccost2 <- rbind(fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                                  "cost_measure_intermediate_data/", 
+                                  "cost_files_by_year/",
+                                  "total_pharmacy_", 2016, "_all_ages.csv"), colClasses = "character",
+                           select = c("INTERNAL_MEMBER_ID",
+                                      "total", "pharmacy_claim_service_line_id"))[
+                                        INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)],
+                     fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                                  "cost_measure_intermediate_data/", 
+                                  "cost_files_by_year/",
+                                  "total_pharmacy_", 2017, "_all_ages.csv"), colClasses = "character",
+                           select = c("INTERNAL_MEMBER_ID",
+                                      "total", "pharmacy_claim_service_line_id"))[INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)])
+    mccost3 <- fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                            "cost_measure_intermediate_data/", 
+                            "cost_files_by_year/",
+                            "total_pharmacy_", 2015, "_all_ages.csv"), colClasses = "character",
+                     select = c("INTERNAL_MEMBER_ID",
+                                "total", "pharmacy_claim_service_line_id"))[
+                                  INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)]
+    setnames(mccost1, "total", "ALLOWED_AMT")
+    setnames(mccost2, "total", "ALLOWED_AMT")
+    setnames(mccost3, "total", "ALLOWED_AMT")
+  }
+  names(mccost1) <- toupper(names(mccost1))
+  names(mccost2) <- toupper(names(mccost2))
+  names(mccost3) <- toupper(names(mccost3))
+  mc1.pt <- mccost1[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+  mc2.pt <- mccost2[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+  mc3.pt <- mccost3[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+  mc1.no <- mccost1[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+  mc2.no <- mccost2[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+  mc3.no <- mccost3[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+  ][ALLOWED_AMT >= 0 & 
+      INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+  mc1.pt <- unique(mc1.pt, usekey = FALSE)
+  mc2.pt <- unique(mc2.pt, usekey = FALSE)
+  mc3.pt <- unique(mc3.pt, usekey = FALSE)
+  mc1.no <- unique(mc1.no, usekey = FALSE)
+  mc2.no <- unique(mc2.no, usekey = FALSE)
+  mc3.no <- unique(mc3.no, usekey = FALSE)
+  rm(mccost1, mccost2, mccost3)
+  gc()
+  mc1.pt.smy <- mc1.pt[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc1.pt.smy <- mc1.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+  mc2.pt.smy <- mc2.pt[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc2.pt.smy <- mc2.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+  mc3.pt.smy <- mc3.pt[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc3.pt.smy <- mc3.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+  mc1.no.smy <- mc1.no[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc1.no.smy <- mc1.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+  mc2.no.smy <- mc2.no[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc2.no.smy <- mc2.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+  mc3.no.smy <- mc3.no[, lapply(.SD, sum, na.rm = TRUE),
+                       .SDcols = "ALLOWED_AMT",
+                       by = "INTERNAL_MEMBER_ID"]
+  mc3.no.smy <- mc3.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+  mc1.pt.smy[is.na(mc1.pt.smy)] <- 0
+  mc2.pt.smy[is.na(mc2.pt.smy)] <- 0
+  mc3.pt.smy[is.na(mc3.pt.smy)] <- 0
+  mc1.no.smy[is.na(mc1.no.smy)] <- 0
+  mc2.no.smy[is.na(mc2.no.smy)] <- 0
+  mc3.no.smy[is.na(mc3.no.smy)] <- 0
+  out <- data.table()
+  for (gender in gender_group){
+    for(ages in age_group){
+      tmp1 <- mc1.pt.smy[age >= min(ages) & age <= max(ages)& GENDER_CODE %in% gender]
+      tmp2 <- mc2.pt.smy[age %in% ages & GENDER_CODE %in% gender]
+      tmp3 <- mc3.pt.smy[age %in% ages & GENDER_CODE %in% gender]
+      cat(paste0("age range ", ages[1], "-", ages[length(ages)], " and gender ", gender[1],
+                 " ", gender[length(gender)],
+                 " results are: ", "\n"))
+      tmp.out <- c(age = paste0(min(ages), "-", max(ages)),
+                   gender = paste0(gender[1], "-", gender[length(gender)]),
+                   summary(tmp1$ALLOWED_AMT)[4], summary(tmp3$ALLOWED_AMT)[4], summary(tmp2$ALLOWED_AMT)[4], 
+                   sd1 = sd(tmp1$ALLOWED_AMT), sd3 = sd(tmp3$ALLOWED_AMT), sd2 = sd(tmp2$ALLOWED_AMT),
+                   summary(tmp1$ALLOWED_AMT)[1], summary(tmp3$ALLOWED_AMT)[1], summary(tmp2$ALLOWED_AMT)[1],
+                   summary(tmp1$ALLOWED_AMT)[6], summary(tmp3$ALLOWED_AMT)[6], summary(tmp2$ALLOWED_AMT)[6],
+                   summary(tmp1$ALLOWED_AMT)[2], summary(tmp3$ALLOWED_AMT)[2], summary(tmp2$ALLOWED_AMT)[2], 
+                   summary(tmp1$ALLOWED_AMT)[3], summary(tmp3$ALLOWED_AMT)[3], summary(tmp2$ALLOWED_AMT)[3],
+                   summary(tmp1$ALLOWED_AMT)[5], summary(tmp3$ALLOWED_AMT)[5], summary(tmp2$ALLOWED_AMT)[5], 
+                   quantile(tmp1$ALLOWED_AMT, 0.95), quantile(tmp3$ALLOWED_AMT, 0.95), quantile(tmp2$ALLOWED_AMT, 0.95),
+                   quantile(tmp1$ALLOWED_AMT, 0.99), quantile(tmp3$ALLOWED_AMT, 0.99), quantile(tmp2$ALLOWED_AMT, 0.99))
+      out <- rbind(out, data.table(t(tmp.out)))
+    }
+  }
+  fwrite(out, file = paste0("sc_", i, ".csv"))
+  
+  out <- data.table()
+  for (gender in gender_group){
+    for(ages in age_group){
+      tmp1 <- mc1.no.smy[age %in% ages & GENDER_CODE %in% gender]
+      tmp2 <- mc2.no.smy[age %in% ages & GENDER_CODE %in% gender]
+      tmp3 <- mc3.no.smy[age %in% ages & GENDER_CODE %in% gender]
+      cat(paste0("age range ", ages[1], "-", ages[length(ages)], " and gender ", gender[1],
+                 " ", gender[length(gender)],
+                 " results are: ", "\n"))
+      tmp.out <- c(age = paste0(min(ages), "-", max(ages)),
+                   gender = paste0(gender[1], "-", gender[length(gender)]),
+                   summary(tmp1$ALLOWED_AMT)[4], summary(tmp3$ALLOWED_AMT)[4], summary(tmp2$ALLOWED_AMT)[4], 
+                   sd1 = sd(tmp1$ALLOWED_AMT), sd3 = sd(tmp3$ALLOWED_AMT), sd2 = sd(tmp2$ALLOWED_AMT),
+                   summary(tmp1$ALLOWED_AMT)[1], summary(tmp3$ALLOWED_AMT)[1], summary(tmp2$ALLOWED_AMT)[1],
+                   summary(tmp1$ALLOWED_AMT)[6], summary(tmp3$ALLOWED_AMT)[6], summary(tmp2$ALLOWED_AMT)[6],
+                   summary(tmp1$ALLOWED_AMT)[2], summary(tmp3$ALLOWED_AMT)[2], summary(tmp2$ALLOWED_AMT)[2], 
+                   summary(tmp1$ALLOWED_AMT)[3], summary(tmp3$ALLOWED_AMT)[3], summary(tmp2$ALLOWED_AMT)[3],
+                   summary(tmp1$ALLOWED_AMT)[5], summary(tmp3$ALLOWED_AMT)[5], summary(tmp2$ALLOWED_AMT)[5], 
+                   quantile(tmp1$ALLOWED_AMT, 0.95), quantile(tmp3$ALLOWED_AMT, 0.95), quantile(tmp2$ALLOWED_AMT, 0.95),
+                   quantile(tmp1$ALLOWED_AMT, 0.99), quantile(tmp3$ALLOWED_AMT, 0.99), quantile(tmp2$ALLOWED_AMT, 0.99))
+      out <- rbind(out, data.table(t(tmp.out)))
+    }
+  }
+  fwrite(out, file = paste0("no_sc_", i, ".csv"))
+  
+  total_pt_cost <- fread(paste0("sc_", i, ".csv"))
+  total_pt_cost <- rbind(total_pt_cost[1:5, ], total_pt_cost[9, ], 
+                         total_pt_cost[6:8, ], total_pt_cost[10:12, ])
+  total_pt_cost <- insertRows(total_pt_cost, c(2, 6, 9, 13), NA)
+  total_no_pt_cost <- fread(paste0("no_sc_", i, ".csv"))
+  total_no_pt_cost <- rbind(total_no_pt_cost[1:5, ], total_no_pt_cost[9, ], 
+                            total_no_pt_cost[6:8, ], total_no_pt_cost[10:12, ])
+  total_no_pt_cost <- insertRows(total_no_pt_cost, c(2, 6, 9, 13), NA)
+  total_cost <- cbind(total_pt_cost[, 1:2],
+                      total_pt_cost[, 3:5], total_no_pt_cost[, 3:5],
+                      total_pt_cost[, 6:8], total_no_pt_cost[, 6:8],
+                      total_pt_cost[, 9:11], total_no_pt_cost[, 9:11],
+                      total_pt_cost[, 12:14], total_no_pt_cost[, 12:14],
+                      total_pt_cost[, 15:17], total_no_pt_cost[, 15:17],
+                      total_pt_cost[, 18:20], total_no_pt_cost[, 18:20],
+                      total_pt_cost[, 21:23], total_no_pt_cost[, 21:23],
+                      total_pt_cost[, 24:26], total_no_pt_cost[, 24:26],
+                      total_pt_cost[, 27:29], total_no_pt_cost[, 27:29])
+  fwrite(total_cost, file = paste0(i, "_smy.csv"))
+  
+}
+

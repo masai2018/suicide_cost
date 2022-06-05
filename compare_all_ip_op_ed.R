@@ -24,6 +24,21 @@ pt_no <- fread(paste0("output/no_sc_2013_2015_pt.csv"), colClasses = "character"
 
 pt_all <- rbind(pt, pt_no)
 
+mc_or_de <- data.table()
+for(yr in 2013:2017){
+  mc_or_de_tmp <- fread(paste0("E:/CT_APCD/Sai/intermediate_data/cost_measure_intermediate_data/medical_fiscalyear_", 
+                           yr, ".csv"), select = c("INTERNAL_MEMBER_ID",
+                                                   "MEDICAL_CLAIM_HEADER_ID",
+                                                   "ORPHANED_ADJUSTMENT_FLAG",
+                                                   "DENIED_CLAIM_FLAG"),
+                    colClasses = "character")[INTERNAL_MEMBER_ID %in% pt_all$INTERNAL_MEMBER_ID & 
+                                                ORPHANED_ADJUSTMENT_FLAG == "Y" |
+                   DENIED_CLAIM_FLAG == "Y", .(MEDICAL_CLAIM_HEADER_ID)] %>% unique()
+  mc_or_de <- rbind(mc_or_de, mc_or_de_tmp) %>% unique()
+  rm(mc_or_de_tmp)
+  gc()
+}
+
 # yr <- 2015
 for (yr in 2013:2017){
   mhf <- fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
@@ -38,9 +53,7 @@ for (yr in 2013:2017){
                           "DENIED_HEADER_FLAG",
                           NULL))[INTERNAL_MEMBER_ID %in% pt_all$INTERNAL_MEMBER_ID &
                                              ORPHANED_HEADER_FLAG == "N" & 
-                                             DENIED_HEADER_FLAG == "N"][, -c("INTERNAL_MEMBER_ID",
-                                                                             "ORPHANED_HEADER_FLAG",
-                                                                             "DENIED_HEADER_FLAG")] %>%
+                                             DENIED_HEADER_FLAG == "N"][, -c("INTERNAL_MEMBER_ID")] %>%
     unique(by = c("ALLOWED_AMT", "MEDICAL_CLAIM_HEADER_ID"))
   setnames(mhf, "first_service_dt", "header_id_dt")
   mc <- fread(paste0("E:/CT_APCD/Sai/intermediate_data/cost_measure_intermediate_data/medical_fiscalyear_", 
@@ -50,17 +63,15 @@ for (yr in 2013:2017){
                                              "MEDICAL_CLAIM_SERVICE_LINE_ID",
                                              "ORPHANED_ADJUSTMENT_FLAG",
                                              "DENIED_CLAIM_FLAG"),
-              colClasses = "character")[INTERNAL_MEMBER_ID %in% pt_all$INTERNAL_MEMBER_ID & 
-                                          ORPHANED_ADJUSTMENT_FLAG == "N" &
-                                          DENIED_CLAIM_FLAG == "N"][, -c("DENIED_CLAIM_FLAG",
-                                                                         "ORPHANED_ADJUSTMENT_FLAG")]
-  rt <- mhf[mc, on = "MEDICAL_CLAIM_HEADER_ID", nomatch = 0]
+              colClasses = "character")[INTERNAL_MEMBER_ID %in% pt_all$INTERNAL_MEMBER_ID]
+  mc <- mc[!MEDICAL_CLAIM_HEADER_ID %in% mc_or_de$MEDICAL_CLAIM_HEADER_ID]
+  rt <- mhf[mc, on = "MEDICAL_CLAIM_HEADER_ID", nomatch = 0] 
   rt[, sc_flag := 0]
   rt[INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID, sc_flag := 1]
   setcolorder(rt, c("MEDICAL_CLAIM_HEADER_ID", "MEDICAL_CLAIM_SERVICE_LINE_ID", "INTERNAL_MEMBER_ID",
                     "ALLOWED_AMT", "first_service_dt", "header_id_dt",
-                    # "ORPHANED_HEADER_FLAG", "DENIED_HEADER_FLAG",
-                    # "ORPHANED_ADJUSTMENT_FLAG", "DENIED_CLAIM_FLAG",
+                    "ORPHANED_HEADER_FLAG", "DENIED_HEADER_FLAG",
+                    "ORPHANED_ADJUSTMENT_FLAG", "DENIED_CLAIM_FLAG",
                     "sc_flag"))
   ed <- get_medical_vs(vs.list = c("ED", "ED Procedure Code"),
                        year.list = (yr - 1):yr,

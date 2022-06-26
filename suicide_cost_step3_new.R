@@ -458,3 +458,184 @@ for(i in c("all","ip", "op", "ed", "pharmacy")){
   
 }
 
+
+
+## pharmacy
+pt <- fread('output/sc_15_no_sc_13_14_ph.csv', colClasses = 'character',
+            select = c("INTERNAL_MEMBER_ID", "birth_dt", 
+                       "GENDER_CODE")) %>% unique()
+pt_no <- fread(paste0("output/no_sc_2013_2015_pt_ph.csv"), colClasses = "character") %>% 
+  unique(use.key = FALSE)
+pt[, age := 2015 - as.integer(birth_dt)]
+pt <- pt[age < 65 & age > 9]
+pt_no[, age := 2015 - as.integer(birth_dt)]
+pt_no <- pt_no[age < 65 & age > 9]
+
+age_group <- list(c(10:64), c(10:24), c(25:44), c(45:64))
+gender_group <- list(c("M", "F"), "M", "F")
+
+i <- 'pharmacy'
+mccost1 <- rbind(fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                              "cost_measure_intermediate_data/", 
+                              "cost_files_by_year/",
+                              "total_pharmacy_", 2013, "_all_ages.csv"), colClasses = "character",
+                       select = c("INTERNAL_MEMBER_ID",
+                                  "total", "pharmacy_claim_service_line_id"))[
+                                    INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)],
+                 fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                              "cost_measure_intermediate_data/", 
+                              "cost_files_by_year/",
+                              "total_pharmacy_", 2014, "_all_ages.csv"), colClasses = "character",
+                       select = c("INTERNAL_MEMBER_ID",
+                                  "total", "pharmacy_claim_service_line_id"))[INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)])
+mccost2 <- rbind(fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                              "cost_measure_intermediate_data/", 
+                              "cost_files_by_year/",
+                              "total_pharmacy_", 2016, "_all_ages.csv"), colClasses = "character",
+                       select = c("INTERNAL_MEMBER_ID",
+                                  "total", "pharmacy_claim_service_line_id"))[
+                                    INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)],
+                 fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                              "cost_measure_intermediate_data/", 
+                              "cost_files_by_year/",
+                              "total_pharmacy_", 2017, "_all_ages.csv"), colClasses = "character",
+                       select = c("INTERNAL_MEMBER_ID",
+                                  "total", "pharmacy_claim_service_line_id"))[INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)])
+mccost3 <- fread(paste0("E:/CT_APCD/Sai/intermediate_data/",
+                        "cost_measure_intermediate_data/", 
+                        "cost_files_by_year/",
+                        "total_pharmacy_", 2015, "_all_ages.csv"), colClasses = "character",
+                 select = c("INTERNAL_MEMBER_ID",
+                            "total", "pharmacy_claim_service_line_id"))[
+                              INTERNAL_MEMBER_ID %in% c(pt$INTERNAL_MEMBER_ID, pt_no$INTERNAL_MEMBER_ID)]
+setnames(mccost1, "total", "ALLOWED_AMT")
+setnames(mccost2, "total", "ALLOWED_AMT")
+setnames(mccost3, "total", "ALLOWED_AMT")
+names(mccost1) <- toupper(names(mccost1))
+names(mccost2) <- toupper(names(mccost2))
+names(mccost3) <- toupper(names(mccost3))
+mc1.pt <- mccost1[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+mc2.pt <- mccost2[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+mc3.pt <- mccost3[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt$INTERNAL_MEMBER_ID]
+mc1.no <- mccost1[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+mc2.no <- mccost2[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+mc3.no <- mccost3[, ALLOWED_AMT := as.numeric(ALLOWED_AMT)
+][ALLOWED_AMT >= 0 & 
+    INTERNAL_MEMBER_ID %in% pt_no$INTERNAL_MEMBER_ID]
+mc1.pt <- unique(mc1.pt, usekey = FALSE)
+mc2.pt <- unique(mc2.pt, usekey = FALSE)
+mc3.pt <- unique(mc3.pt, usekey = FALSE)
+mc1.no <- unique(mc1.no, usekey = FALSE)
+mc2.no <- unique(mc2.no, usekey = FALSE)
+mc3.no <- unique(mc3.no, usekey = FALSE)
+rm(mccost1, mccost2, mccost3)
+gc()
+mc1.pt.smy <- mc1.pt[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc1.pt.smy <- mc1.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+mc2.pt.smy <- mc2.pt[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc2.pt.smy <- mc2.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+mc3.pt.smy <- mc3.pt[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc3.pt.smy <- mc3.pt.smy[pt, on = "INTERNAL_MEMBER_ID"]
+mc1.no.smy <- mc1.no[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc1.no.smy <- mc1.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+mc2.no.smy <- mc2.no[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc2.no.smy <- mc2.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+mc3.no.smy <- mc3.no[, lapply(.SD, sum, na.rm = TRUE),
+                     .SDcols = "ALLOWED_AMT",
+                     by = "INTERNAL_MEMBER_ID"]
+mc3.no.smy <- mc3.no.smy[pt_no, on = "INTERNAL_MEMBER_ID"]
+mc1.pt.smy[is.na(mc1.pt.smy)] <- 0
+mc2.pt.smy[is.na(mc2.pt.smy)] <- 0
+mc3.pt.smy[is.na(mc3.pt.smy)] <- 0
+mc1.no.smy[is.na(mc1.no.smy)] <- 0
+mc2.no.smy[is.na(mc2.no.smy)] <- 0
+mc3.no.smy[is.na(mc3.no.smy)] <- 0
+out <- data.table()
+for (gender in gender_group){
+  for(ages in age_group){
+    tmp1 <- mc1.pt.smy[age >= min(ages) & age <= max(ages)& GENDER_CODE %in% gender]
+    tmp2 <- mc2.pt.smy[age %in% ages & GENDER_CODE %in% gender]
+    tmp3 <- mc3.pt.smy[age %in% ages & GENDER_CODE %in% gender]
+    cat(paste0("age range ", ages[1], "-", ages[length(ages)], " and gender ", gender[1],
+               " ", gender[length(gender)],
+               " results are: ", "\n"))
+    tmp.out <- c(age = paste0(min(ages), "-", max(ages)),
+                 gender = paste0(gender[1], "-", gender[length(gender)]),
+                 summary(tmp1$ALLOWED_AMT)[4], summary(tmp3$ALLOWED_AMT)[4], summary(tmp2$ALLOWED_AMT)[4], 
+                 sd1 = sd(tmp1$ALLOWED_AMT), sd3 = sd(tmp3$ALLOWED_AMT), sd2 = sd(tmp2$ALLOWED_AMT),
+                 summary(tmp1$ALLOWED_AMT)[1], summary(tmp3$ALLOWED_AMT)[1], summary(tmp2$ALLOWED_AMT)[1],
+                 summary(tmp1$ALLOWED_AMT)[6], summary(tmp3$ALLOWED_AMT)[6], summary(tmp2$ALLOWED_AMT)[6],
+                 summary(tmp1$ALLOWED_AMT)[2], summary(tmp3$ALLOWED_AMT)[2], summary(tmp2$ALLOWED_AMT)[2], 
+                 summary(tmp1$ALLOWED_AMT)[3], summary(tmp3$ALLOWED_AMT)[3], summary(tmp2$ALLOWED_AMT)[3],
+                 summary(tmp1$ALLOWED_AMT)[5], summary(tmp3$ALLOWED_AMT)[5], summary(tmp2$ALLOWED_AMT)[5], 
+                 quantile(tmp1$ALLOWED_AMT, 0.95), quantile(tmp3$ALLOWED_AMT, 0.95), quantile(tmp2$ALLOWED_AMT, 0.95),
+                 quantile(tmp1$ALLOWED_AMT, 0.99), quantile(tmp3$ALLOWED_AMT, 0.99), quantile(tmp2$ALLOWED_AMT, 0.99))
+    out <- rbind(out, data.table(t(tmp.out)))
+  }
+}
+fwrite(out, file = paste0("sc_", i, ".csv"))
+
+out <- data.table()
+for (gender in gender_group){
+  for(ages in age_group){
+    tmp1 <- mc1.no.smy[age %in% ages & GENDER_CODE %in% gender]
+    tmp2 <- mc2.no.smy[age %in% ages & GENDER_CODE %in% gender]
+    tmp3 <- mc3.no.smy[age %in% ages & GENDER_CODE %in% gender]
+    cat(paste0("age range ", ages[1], "-", ages[length(ages)], " and gender ", gender[1],
+               " ", gender[length(gender)],
+               " results are: ", "\n"))
+    tmp.out <- c(age = paste0(min(ages), "-", max(ages)),
+                 gender = paste0(gender[1], "-", gender[length(gender)]),
+                 summary(tmp1$ALLOWED_AMT)[4], summary(tmp3$ALLOWED_AMT)[4], summary(tmp2$ALLOWED_AMT)[4], 
+                 sd1 = sd(tmp1$ALLOWED_AMT), sd3 = sd(tmp3$ALLOWED_AMT), sd2 = sd(tmp2$ALLOWED_AMT),
+                 summary(tmp1$ALLOWED_AMT)[1], summary(tmp3$ALLOWED_AMT)[1], summary(tmp2$ALLOWED_AMT)[1],
+                 summary(tmp1$ALLOWED_AMT)[6], summary(tmp3$ALLOWED_AMT)[6], summary(tmp2$ALLOWED_AMT)[6],
+                 summary(tmp1$ALLOWED_AMT)[2], summary(tmp3$ALLOWED_AMT)[2], summary(tmp2$ALLOWED_AMT)[2], 
+                 summary(tmp1$ALLOWED_AMT)[3], summary(tmp3$ALLOWED_AMT)[3], summary(tmp2$ALLOWED_AMT)[3],
+                 summary(tmp1$ALLOWED_AMT)[5], summary(tmp3$ALLOWED_AMT)[5], summary(tmp2$ALLOWED_AMT)[5], 
+                 quantile(tmp1$ALLOWED_AMT, 0.95), quantile(tmp3$ALLOWED_AMT, 0.95), quantile(tmp2$ALLOWED_AMT, 0.95),
+                 quantile(tmp1$ALLOWED_AMT, 0.99), quantile(tmp3$ALLOWED_AMT, 0.99), quantile(tmp2$ALLOWED_AMT, 0.99))
+    out <- rbind(out, data.table(t(tmp.out)))
+  }
+}
+fwrite(out, file = paste0("no_sc_", i, ".csv"))
+
+total_pt_cost <- fread(paste0("sc_", i, ".csv"))
+total_pt_cost <- rbind(total_pt_cost[1:5, ], total_pt_cost[9, ], 
+                       total_pt_cost[6:8, ], total_pt_cost[10:12, ])
+total_pt_cost <- insertRows(total_pt_cost, c(2, 6, 9, 13), NA)
+total_no_pt_cost <- fread(paste0("no_sc_", i, ".csv"))
+total_no_pt_cost <- rbind(total_no_pt_cost[1:5, ], total_no_pt_cost[9, ], 
+                          total_no_pt_cost[6:8, ], total_no_pt_cost[10:12, ])
+total_no_pt_cost <- insertRows(total_no_pt_cost, c(2, 6, 9, 13), NA)
+total_cost <- cbind(total_pt_cost[, 1:2],
+                    total_pt_cost[, 3:5], total_no_pt_cost[, 3:5],
+                    total_pt_cost[, 6:8], total_no_pt_cost[, 6:8],
+                    total_pt_cost[, 9:11], total_no_pt_cost[, 9:11],
+                    total_pt_cost[, 12:14], total_no_pt_cost[, 12:14],
+                    total_pt_cost[, 15:17], total_no_pt_cost[, 15:17],
+                    total_pt_cost[, 18:20], total_no_pt_cost[, 18:20],
+                    total_pt_cost[, 21:23], total_no_pt_cost[, 21:23],
+                    total_pt_cost[, 24:26], total_no_pt_cost[, 24:26],
+                    total_pt_cost[, 27:29], total_no_pt_cost[, 27:29])
+fwrite(total_cost, file = paste0(i, "_smy.csv"))
